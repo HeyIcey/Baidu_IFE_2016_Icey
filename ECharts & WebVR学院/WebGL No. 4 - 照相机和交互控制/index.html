@@ -10,7 +10,7 @@
     <script type="text/javascript" src="Decector.js"></script>
 </head>
 
-<body onload="init()">
+<body id="center" onload="init()">
     <div>
         <canvas id="mainCanvas"></canvas>
     </div>
@@ -72,10 +72,11 @@
             renderer.render(scene, camera);
         });
         plane = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshLambertMaterial({
-            map: texture
+            map: texture,
+            side: THREE.DoubleSide
         }));
         plane.rotation.x = -Math.PI * 0.5;
-        plane.position.y = -1;
+        plane.position.y = -0.75;
         plane.receiveShadow = true;
         scene.add(plane);
         // var plane = new THREE.Mesh(new THREE.PlaneGeometry(8, 8, 16, 16),
@@ -89,29 +90,32 @@
 
         // material
         var materials = [];
-            for (var i = 1; i < 7; ++i) {
-                materials.push(new THREE.MeshBasicMaterial({
-                    map: THREE.ImageUtils.loadTexture('face' + i + '.jpg',
-                            {}, function() {
-                                renderer.render(scene, camera);
-                            }),
-                    overdraw: true
-                }));
-            }
+        for (var i = 1; i < 7; ++i) {
+            materials.push(new THREE.MeshBasicMaterial({
+                map: THREE.ImageUtils.loadTexture('face' + i + '.jpg', {}, function() {
+                    renderer.render(scene, camera);
+                }),
+                overdraw: true
+            }));
+        }
 
-            var cube = new THREE.Mesh(new THREE.CubeGeometry(2, 1, 1),
-                    new THREE.MeshFaceMaterial(materials));
-            cube.castShadow = true;
-            cube.reveiveShadow = true;
-            scene.add(cube);
+        var cube = new THREE.Mesh(new THREE.CubeGeometry(2, 1, 1),
+            new THREE.MeshFaceMaterial(materials));
+        cube.castShadow = true;
+        cube.reveiveShadow = true;
+        scene.add(cube);
         // //carBody 
         // var carBody = new THREE.CubeGeometry(2, 1, 1);
         // var cube = new THREE.Mesh(carBody, material);
         // scene.add(cube);
 
         // // carCircle
-        var tire = THREE.ImageUtils.loadTexture('luntai.jpg', {}, function() {renderer.render(scene, camera);});
-        var tireMaterial =  new THREE.MeshLambertMaterial({map: tire});
+        var tire = THREE.ImageUtils.loadTexture('luntai.jpg', {}, function() {
+            renderer.render(scene, camera);
+        });
+        var tireMaterial = new THREE.MeshLambertMaterial({
+            map: tire
+        });
         var carCircle = new THREE.TorusGeometry(0.2, 0.06, 52, 48);
 
         var carCircle1 = new THREE.Mesh(carCircle, tireMaterial);
@@ -134,6 +138,96 @@
         carCircle3.castShadow = true;
         carCircle4.castShadow = true;
 
+        // animation
+        var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+        window.requestAnimationFrame = requestAnimationFrame;
+        var flag = false;
+
+        var center = document.getElementById("center");
+        var handler = function(event) {
+            if (!flag) {
+                flag = true
+            } else {
+                return
+            }
+            switch (event.keyCode) {
+                case 87:
+                    id = requestAnimationFrame(drawUp);
+
+                    function drawUp() {
+                        stat.begin();
+                        cube.position.x = cube.position.x + 0.01;
+                        carCircle1.position.x = carCircle1.position.x + 0.01;
+                        carCircle2.position.x = carCircle2.position.x + 0.01;
+                        carCircle3.position.x = carCircle3.position.x + 0.01;
+                        carCircle4.position.x = carCircle4.position.x + 0.01;
+                        renderer.render(scene, camera);
+                        id = requestAnimationFrame(drawUp);
+                        stat.end()
+                    }
+                    break;
+                case 83:
+                    id = requestAnimationFrame(drawDown);
+
+                    function drawDown() {
+                        stat.begin();
+                        cube.position.x = cube.position.x - 0.01;
+                        carCircle1.position.x = carCircle1.position.x - 0.01;
+                        carCircle2.position.x = carCircle2.position.x - 0.01;
+                        carCircle3.position.x = carCircle3.position.x - 0.01;
+                        carCircle4.position.x = carCircle4.position.x - 0.01;
+                        renderer.render(scene, camera);
+                        id = requestAnimationFrame(drawDown);
+                        stat.end()
+                    }
+                    break;
+                case 65:
+                    id = requestAnimationFrame(drawLeft);
+
+                    function drawLeft() {
+                        stat.begin();
+                        cube.position.z = cube.position.z + 0.01;
+                        carCircle1.position.z = carCircle1.position.z + 0.01;
+                        carCircle2.position.z = carCircle2.position.z + 0.01;
+                        carCircle3.position.z = carCircle3.position.z + 0.01;
+                        carCircle4.position.z = carCircle4.position.z + 0.01;
+                        renderer.render(scene, camera);
+                        id = requestAnimationFrame(drawLeft);
+                        stat.end()
+                    }
+                    break;
+                case 68:
+                    id = requestAnimationFrame(drawRight);
+
+                    function drawRight() {
+                        stat.begin();
+                        cube.position.z = cube.position.z - 0.01;
+                        carCircle1.position.z = carCircle1.position.z - 0.01;
+                        carCircle2.position.z = carCircle2.position.z - 0.01;
+                        carCircle3.position.z = carCircle3.position.z - 0.01;
+                        carCircle4.position.z = carCircle4.position.z - 0.01;
+                        renderer.render(scene, camera);
+                        id = requestAnimationFrame(drawRight);
+                        stat.end()
+                    }
+                    break;
+            }
+        }
+
+        function stop() {
+            if (flag) {
+                flag = false;
+            } else {
+                return
+            }
+            if (id !== null) {
+                cancelAnimationFrame(id);
+                id = null;
+            }w
+        }
+
+        center.addEventListener('keydown', handler, false);
+        center.addEventListener('keyup', stop, false);
 
         // render
         function render() {
